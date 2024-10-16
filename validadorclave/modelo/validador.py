@@ -1,11 +1,8 @@
-# TODO: Implementa el código del ejercicio aquí
-
 from abc import ABC, abstractmethod
 
 
 class ReglaValidacion(ABC):
-
-    def _init_(self, longitud_esperada: int):
+    def __init__(self, longitud_esperada: int):
         self._longitud_esperada: int = longitud_esperada
 
     @abstractmethod
@@ -15,7 +12,6 @@ class ReglaValidacion(ABC):
 
     def _validar_longitud(self, clave: str) -> bool:
         return len(clave) > self._longitud_esperada
-
 
     def _contiene_mayuscula(self, clave: str) -> bool:
         for c in clave:
@@ -34,6 +30,30 @@ class ReglaValidacion(ABC):
             if c.isdigit():
                 return True
         return False
+
+class ReglaValidacionGanimedes(ReglaValidacion):
+    def __init__(self):
+        super().__init__(longitud_esperada=8)
+
+    def contiene_caracter_especial(self, clave: str) -> bool:
+        especiales = {'@', '_', '#', '$', '%'}
+        return any(char in especiales for char in clave)
+
+    def es_valida(self, clave: str) -> bool:
+        if not self._validar_longitud(clave):
+            raise ValueError("La clave debe tener una longitud de más de 8 caracteres")
+        if not self._contiene_mayuscula(clave):
+            raise ValueError("La clave debe contener al menos una letra mayúscula")
+        if not self._contiene_minuscula(clave):
+            raise ValueError("La clave debe contener al menos una letra minúscula")
+        if not self._contiene_numero(clave):
+            raise ValueError("La clave debe contener al menos un número")
+        if not self.contiene_caracter_especial(clave):
+            raise ValueError("La clave debe contener al menos un caracter especial (@, _, #, $, %)")
+
+        return True
+
+
 
 
 
