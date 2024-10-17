@@ -1,95 +1,97 @@
 from abc import ABC, abstractmethod
+from validadorclave.modelo.errores import *
 
 
 class ReglaValidacion(ABC):
-    def __init__(self, longitud_esperada: int):
+
+    def __init__(self, longitud_esperada):
         self._longitud_esperada: int = longitud_esperada
 
     @abstractmethod
-    def es_valida(self, clave: str) -> bool:
-        """Método abstracto que debe ser implementado por las subclases para verificar la validez de la clave"""
+    def es_valida(self, clave):
         pass
 
-    def _validar_longitud(self, clave: str) -> bool:
+    def _validar_longitud(self, clave):
         return len(clave) > self._longitud_esperada
 
-    def _contiene_mayuscula(self, clave: str) -> bool:
-        for c in clave:
-            if c.isupper():
+    def _contiene_mayuscula(self, clave):
+        for item in clave:
+            if item.isupper():
                 return True
         return False
 
-    def _contiene_minuscula(self, clave: str) -> bool:
-        for c in clave:
-            if c.islower():
+    def _contiene_minuscula(self, clave):
+        for item in clave:
+            if item.islower():
                 return True
         return False
 
-    def _contiene_numero(self, clave: str) -> bool:
-        for c in clave:
-            if c.isdigit():
+    def _contiene_numero(self, clave):
+        for item in clave:
+            if item.isdigit():
                 return True
         return False
+
 
 class ReglaValidacionGanimedes(ReglaValidacion):
-    def __init__(self):
-        super().__init__(longitud_esperada=8)
 
-    def contiene_caracter_especial(self, clave: str) -> bool:
-        especiales = {'@', '_', '#', '$', '%'}
-        return any(char in especiales for char in clave)
+    def __init__(self, longitud_esperada=8):
+        super().__init__(longitud_esperada)
 
-    def es_valida(self, clave: str) -> bool:
+    def contiene_caracter_especial(self, clave):
+        especial = "@_#$%"
+        for i in especial:
+            if i in clave:
+                return True
+        return False
+
+    def es_valida(self, clave):
         if not self._validar_longitud(clave):
-            raise ValueError("La clave debe tener una longitud de más de 8 caracteres")
+            raise NoCumpleLongitudMinimaError()
         if not self._contiene_mayuscula(clave):
-            raise ValueError("La clave debe contener al menos una letra mayúscula")
+            raise NoTieneLetraMayusculaError()
         if not self._contiene_minuscula(clave):
-            raise ValueError("La clave debe contener al menos una letra minúscula")
+            raise NoTieneLetraMinusculaError()
         if not self._contiene_numero(clave):
-            raise ValueError("La clave debe contener al menos un número")
+            raise NoTieneNumeroError()
         if not self.contiene_caracter_especial(clave):
-            raise ValueError("La clave debe contener al menos un caracter especial (@, _, #, $, %)")
+            raise NoTieneCaracterEspecialError()
 
         return True
 
+
 class ReglaValidacionCalisto(ReglaValidacion):
-    def __init__(self):
-        super().__init__(longitud_esperada=6)
 
-    def contiene_calisto(self, clave: str) -> bool:
-        mayusculas = sum(1 for char in clave if char.isupper())
-        total_letras = len(clave)
-        return mayusculas >= 2 and mayusculas < total_letras
+    def __init__(self, longitud_esperada=6):
+        super().__init__(longitud_esperada)
 
+    def contiene_calisto(self, clave):
+        if "calisto" in clave.lower():
+            counter = 0
+            for item in clave:
+                if item in "CALISTO":
+                    counter += 1
 
-    def es_valida(self, clave: str) -> bool:
-       if not self._validar_longitud(clave):
-           raise ValueError("ReglaValidacionCalisto: La clave debe tener una longitud de más de 6 caracteres.")
-       if not self._contiene_numero(clave):
-           raise ValueError("ReglaValidacionCalisto: La clave debe contener al menos un número.")
-       if not self.contiene_calisto(clave):
-           raise ValueError("ReglaValidacionCalisto: La palabra calisto debe estar escrita con al menos dos letras en mayúscula.")
-       return True
+            if 2 <= counter < 7:
+                return True
+        return False
+
+    def es_valida(self, clave):
+        if not self._validar_longitud(clave):
+            raise NoCumpleLongitudMinimaError()
+        if not self._contiene_numero(clave):
+            raise NoTieneNumeroError()
+        if not self.contiene_calisto(clave):
+            raise NoTienePalabraSecretaError()
+
+        return True
 
 class Validador:
-   def _init_(self, regla: ReglaValidacion):
-       self.regla = regla
 
+    def __init__(self, regla: ReglaValidacion):
+        self.regla = regla
 
-   def es_valida(self, clave: str) -> bool:
-       return self.regla.es_valida(clave)
-
-
-   def validar_calve(clave: str, reglas: list):
-       for regla in reglas:
-           validador = Validador(clave)
-           pass
-
-
-
-
-
-
+    def es_valida(self, clave: str) -> bool:
+        return self.regla.es_valida(clave)
 
 
